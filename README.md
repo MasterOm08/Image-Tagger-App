@@ -9,6 +9,13 @@ An automated, server-less web application built with **Flask** and deployed on *
 
 ## Architecture & Cloud Services
 
+```mermaid
+flowchart TD
+    A[User] -->|Upload Image| B[App Engine - Flask]
+    B -->|Save Raw File| C[Cloud Storage]
+    B -->|Analyze Content| D[Cloud Vision API]
+    B -->|Store Metadata| E[Cloud Firestore]
+```
 This project integrates four core Google Cloud services:
 
 * **Google App Engine (Standard Environment)**: Hosts the Python 3.12 Flask app behind a managed Gunicorn WSGI server.
