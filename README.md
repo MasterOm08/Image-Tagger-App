@@ -7,6 +7,16 @@ An automated, server-less web application built with **Flask** and deployed on *
 
 ---
 
+## Key Features
+
+* **Asynchronous Drag-and-Drop Uploads**: Sleek UI with dynamic frontend image previews.
+* **AI Image Labeling**: Leverages Google Cloud Vision API to extract descriptive tags and confidence percentages.
+* **Confidence Badges**: Clean CSS UI tags with visual confidence metrics for every detected label.
+* **Safe Storage Lifecycle**: Smart deletion logic ensures Cloud Storage files are only removed when no remaining Firestore documents reference them (protecting shared blobs when duplicate filenames are uploaded).
+* **Backward Compatibility**: Robust backend handling gracefully supports legacy data models (plain string tags) alongside structured confidence objects.
+
+---
+
 ## Architecture & Cloud Services
 
 ```mermaid
