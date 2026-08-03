@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Tagger</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Image Tagger</h1>
+            <p>Upload an image to automatically analyze and tag content using Google Cloud Vision</p>
+        </header>
+
+        <!-- Upload Form -->
+        <section class="upload-section">
+            <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+                <div class="drop-zone" id="dropZone">
+                    <input type="file" name="file" id="fileInput" accept="image/*" required hidden>
+                    <div class="drop-zone-content" id="dropZoneContent">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <p id="uploadText"><strong>Click to select</strong> or drag and drop an image here</p>
+                    </div>
+                    <img id="imagePreview" src="#" alt="Preview" style="display: none; max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 10px;">
+                </div>
+                <button type="submit" id="submitBtn">Upload & Analyze</button>
+            </form>
+        </section>
+
+        <!-- Image Gallery Grid -->
+        <section class="gallery-section">
+            <h2>Analyzed Images</h2>
+            <div class="gallery-grid">
+                {% for img in images %}
+                    <div class="gallery-card">
+                        <div class="card-image-wrapper">
+                            <img src="{{ img.url }}" alt="{{ img.filename }}">
+                            <!-- Delete Button -->
+                            <form action="/delete/{{ img.id }}" method="POST" class="delete-form" onsubmit="return confirm('Delete this image?');">
+                                <button type="submit" class="delete-btn" title="Delete Image">&times;</button>
+                            </form>
+                        </div>
+                        <div class="card-info">
+                            <p class="filename">{{ img.filename }}</p>
+                            <div class="tags-container">
+                                {% for tag in img.tags %}
+                                    {% if tag is mapping %}
+                                        <span class="tag-badge">
+                                            {{ tag.description }} <small class="confidence">{{ tag.confidence }}%</small>
+                                        </span>
+                                    {% else %}
+                                        <!-- Legacy fallback for plain string tags -->
+                                        <span class="tag-badge">{{ tag }}</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="empty-state">No images uploaded yet. Drop an image above to get started!</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const dropZone = document.getElementById("dropZone");
+            const fileInput = document.getElementById("fileInput");
+            const uploadText = document.getElementById("uploadText");
+            const imagePreview = document.getElementById("imagePreview");
+            const uploadForm = document.getElementById("uploadForm");
+            const submitBtn = document.getElementById("submitBtn");
+
+            // Trigger file input click when dropzone wrapper is clicked
+            dropZone.addEventListener("click", () => fileInput.click());
+
+            // Handle file selection preview
+            fileInput.addEventListener("change", (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    uploadText.innerHTML = `Selected: <strong>${file.name}</strong>`;
+                    imagePreview.src = URL.createObjectURL(file);
+                    imagePreview.style.display = "block";
+                }
+            });
+
+            // Handle drag-and-drop UI feedback
+            ["dragenter", "dragover"].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add("drag-over");
+                }, false);
+            });
+
+            ["dragleave", "drop"].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove("drag-over");
+                }, false);
+            });
+
+            dropZone.addEventListener("drop", (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    fileInput.dispatchEvent(new Event("change"));
+                }
+            });
+
+            // Prevent multi-submissions
+            uploadForm.addEventListener("submit", () => {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Analyzing Image...";
+            });
+        });
+    </script>
+</body>
+</html>

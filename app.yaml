@@ -1,0 +1,2 @@
+runtime: python312 # or python39, python311 depending on your local version
+entrypoint: gunicorn -b :$PORT app:app
